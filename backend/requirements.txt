@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+asyncpg
+databases
+python-dotenv
+pydantic
+python-jose
+firebase-admin
+apscheduler
+httpx
+pandas
+openai
+pydantic-settings
