@@ -13,8 +13,17 @@ class Domain(Base):
 class Dataset(Base):
     __tablename__ = "datasets"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(String, primary_key=True)
     domain = Column(String(100))
+    title = Column(String(255))   # ✅ ADD THIS
     metadata_json = Column(JSON)
     source = Column(String(255))
     created_at = Column(DateTime, server_default=func.now())
+
+
+class DatasetRecord(Base):
+    __tablename__ = "dataset_records"
+
+    id = Column(Integer, primary_key=True)
+    dataset_id = Column(String)
+    data = Column(JSON)

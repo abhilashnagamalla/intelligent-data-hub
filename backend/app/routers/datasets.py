@@ -1,19 +1,21 @@
-from fastapi import APIRouter
-from app.services.data_service import (
-    get_domain_datasets,
-    fetch_live_data
-)
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+
+from app.database import get_db
+from app.models import Dataset
 
 router = APIRouter(prefix="/datasets", tags=["Datasets"])
 
 
-# List metadata
 @router.get("/{domain}")
-async def list_datasets(domain: str):
-    return await get_domain_datasets(domain)
 
+async def get_domain_catalog(domain: str, db: AsyncSession = Depends(get_db)):
 
-# Fetch real data dynamically
-@router.get("/live/{resource_id}")
-async def live_data(resource_id: str):
-    return await fetch_live_data(resource_id)
+    result = await db.execute(
+        select(Dataset).where(Dataset.domain == domain)
+    )
+
+    datasets = result.scalars().all()
+
+    return datasets

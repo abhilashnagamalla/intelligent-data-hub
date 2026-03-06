@@ -1,3 +1,6 @@
+cd backend
+python -m uvicorn app.main:app --reload
+
 npm create vite@latest frontend
 cd frontend
 npm install
