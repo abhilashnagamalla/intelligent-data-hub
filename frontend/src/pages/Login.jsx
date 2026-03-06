@@ -16,6 +16,7 @@ export default function Login() {
       if (!result.user.email.endsWith("@gmail.com")) {
         alert("Only Gmail accounts are allowed");
         setLoading(false);
+        await auth.signOut();
         return;
       }
 
