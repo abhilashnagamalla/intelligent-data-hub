@@ -1,25 +1,23 @@
 from fastapi import FastAPI
-from app.database import connect_db, disconnect_db
-from app.routers import domains, datasets, chat
+from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="Intelligent Data Hub")
+from app.routers import datasets, domains, chatbot
 
+app = FastAPI(title="Intelligent Data Hub API")
 
-@app.on_event("startup")
-async def startup():
-    await connect_db()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-
-@app.on_event("shutdown")
-async def shutdown():
-    await disconnect_db()
+app.include_router(datasets.router)
+app.include_router(domains.router)
+app.include_router(chatbot.router)
 
 
 @app.get("/")
-async def root():
-    return {"message": "Intelligent Data Hub Backend Running 🚀"}
-
-
-app.include_router(domains.router)
-app.include_router(chat.router)
-app.include_router(datasets.router)
+def root():
+    return {"message": "Intelligent Data Hub API running"}

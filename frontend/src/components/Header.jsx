@@ -1,124 +1,66 @@
-import { useNavigate, Link, useLocation } from "react-router-dom";
-import { useState, useRef, useEffect } from "react";
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Search, Bell } from 'lucide-react';
+import LanguageSelector from './LanguageSelector';
+import DarkModeToggle from './DarkModeToggle';
+import ProfileDropdown from './ProfileDropdown';
 
 export default function Header() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [open, setOpen] = useState(false);
-  const menuRef = useRef(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const { t } = useTranslation();
 
-  const storedUser = localStorage.getItem("user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
-
-  const logout = () => {
-    localStorage.removeItem("user");
-    navigate("/");
+  const handleSearch = (e) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      console.log('Search:', searchQuery);
+    }
   };
-
-  const getInitials = (name) => {
-    if (!name) return "U";
-    const names = name.split(" ");
-    return names.length > 1
-      ? names[0][0] + names[1][0]
-      : names[0][0];
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   return (
-    <div className="bg-white border-b px-8 py-4 flex justify-between items-center">
-
-      {/* Left Section */}
-      <div>
-        <h1 className="text-xl font-semibold text-gray-800">
-          Intelligent Data Hub
-        </h1>
-        <p className="text-sm text-gray-500">
-          Public Data Analytics Overview
-        </p>
-      </div>
-
-      {/* Right Section */}
-      <div className="flex items-center gap-6">
-
-        {/* Navigation Links */}
-        <Link
-          to="/dashboard"
-          className={`font-medium ${
-            location.pathname === "/dashboard"
-              ? "text-blue-600"
-              : "text-gray-600 hover:text-blue-600"
-          }`}
-        >
-          Dashboard
-        </Link>
-
-        <Link
-          to="/chatbot"
-          className={`font-medium ${
-            location.pathname === "/chatbot"
-              ? "text-blue-600"
-              : "text-gray-600 hover:text-blue-600"
-          }`}
-        >
-          AI Chatbot
-        </Link>
-
-        {/* Avatar Dropdown */}
-        <div className="relative" ref={menuRef}>
-          <div
-            onClick={() => setOpen(!open)}
-            className="w-10 h-10 bg-blue-600 text-white flex items-center justify-center rounded-full cursor-pointer hover:bg-blue-700 transition font-semibold"
-          >
-            {getInitials(user?.name)}
+    <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700 shadow-sm sticky top-0 z-40">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Left: Logo */}
+          <div className="flex-shrink-0 flex items-center">
+            <h1 className="text-2xl md:text-3xl font-black bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent drop-shadow-lg">
+              {t('Intelligent Data Hub')}
+            </h1>
           </div>
 
-          {open && (
-            <div className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-lg border py-3">
-
-              <div className="px-4 pb-3 border-b">
-                <p className="font-semibold text-gray-800">
-                  {user?.name}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {user?.email}
-                </p>
-              </div>
-
-              <div className="mt-2 text-sm">
-
-                <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                  Profile
-                </div>
-
-                <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                  Settings
-                </div>
-
-                <div className="border-t my-2"></div>
-
-                <div
-                  onClick={logout}
-                  className="px-4 py-2 hover:bg-red-50 text-red-600 cursor-pointer"
-                >
-                  Logout
-                </div>
-
-              </div>
+          {/* Center: Search */}
+          <div className="flex-1 max-w-lg mx-12 hidden lg:flex">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder={t('Search datasets, domains...', { defaultValue: 'Search datasets, domains...' })}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearch}
+                className="w-full pl-12 pr-12 py-3 border border-gray-200 dark:border-gray-600 rounded-3xl bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all shadow-sm hover:shadow-md"
+              />
+              <button className="absolute right-4 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-primary/10 transition-colors">
+                <Search className="w-4 h-4 text-gray-500" />
+              </button>
             </div>
-          )}
+          </div>
 
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2">
+            <button 
+              className="relative p-2 rounded-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all group"
+              title="Notifications"
+            >
+              <Bell className="w-6 h-6" />
+              <span className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full text-xs flex items-center justify-center font-bold animate-pulse shadow-lg border-2 border-white/50 drop-shadow-lg">
+                3
+              </span>
+            </button>
+            <DarkModeToggle />
+            <LanguageSelector />
+            <ProfileDropdown />
+          </div>
         </div>
       </div>
-    </div>
+    </header>
   );
 }

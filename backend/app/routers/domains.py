@@ -1,15 +1,20 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter
 
-from app.database import get_db
-from app.services.data_service import sync_domain
+from app.services.data_service import SECTORS, dataset_count
 
-router = APIRouter(prefix="/domains", tags=["Domains"])
+router = APIRouter(prefix="/domains")
 
 
-@router.post("/fetch")
-async def fetch_domain(domain: str, db: AsyncSession = Depends(get_db)):
+@router.get("/")
+def get_domains():
 
-    await sync_domain(domain, db)
+    domains = []
 
-    return {"message": f"Datasets synced for {domain}"}
+    for sector in SECTORS:
+
+        domains.append({
+            "sector": sector,
+            "datasets": dataset_count(sector)
+        })
+
+    return domains

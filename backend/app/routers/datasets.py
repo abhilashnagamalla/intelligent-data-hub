@@ -1,21 +1,37 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from fastapi import APIRouter
 
-from app.database import get_db
-from app.models import Dataset
+from app.services.data_service import *
+from app.services.dataset_visualizer import generate_charts
+from app.services.dataset_explainer import explain_dataset
 
-router = APIRouter(prefix="/datasets", tags=["Datasets"])
+router = APIRouter(prefix="/datasets")
 
 
-@router.get("/{domain}")
+@router.get("/{sector}")
+def sector_datasets(sector: str):
 
-async def get_domain_catalog(domain: str, db: AsyncSession = Depends(get_db)):
+    return {
+        "sector": sector,
+        "datasets": list_datasets(sector)
+    }
 
-    result = await db.execute(
-        select(Dataset).where(Dataset.domain == domain)
-    )
 
-    datasets = result.scalars().all()
+@router.get("/{sector}/{filename}")
+def dataset_analysis(sector: str, filename: str):
 
-    return datasets
+    df = load_dataset(sector, filename)
+
+    preview = dataset_preview(df)
+
+    stats = dataset_summary(df)
+
+    charts = generate_charts(df)
+
+    explanation = explain_dataset(df)
+
+    return {
+        "preview": preview,
+        "stats": stats,
+        "charts": charts,
+        "explanation": explanation
+    }

@@ -1,17 +1,17 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Layout from "./components/Layout";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
+
 import Dashboard from "./pages/Dashboard";
-import Chatbot from "./pages/Chatbot";
 import DomainPage from "./pages/DomainPage";
+import Chatbot from "./pages/Chatbot";
+import DatasetDetail from "./pages/DatasetDetail";
 
-function ProtectedRoute({ children }) {
-
-  const user = localStorage.getItem("user");
-
-  return user ? children : <Navigate to="/" />;
-
-}
+import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
 
@@ -21,37 +21,29 @@ export default function App() {
 
       <Routes>
 
-        <Route path="/" element={<Login />} />
+        {/* Default page */}
+        <Route path="/" element={<Navigate to="/dashboard" />} />
 
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-        <Route
-          path="/domain/:name"
-          element={
-            <ProtectedRoute>
-              <DomainPage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/chatbot"
-          element={
-            <ProtectedRoute>
-              <Chatbot />
-            </ProtectedRoute>
-          }
-        />
+        {/* Protected dashboard layout */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }>
+          <Route index element={<Dashboard />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="domain/:sector" element={<DomainPage />} />
+          <Route path="domain/:sector/:filename" element={<DatasetDetail />} />
+          <Route path="chatbot" element={<Chatbot />} />
+        </Route>
 
       </Routes>
 
     </BrowserRouter>
+
   );
 }

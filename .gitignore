@@ -1,18 +1,38 @@
-# Backend
-backend/venv/
-backend/.env
+# Environment files
+.env
+.env.*
 
-# Frontend
-frontend/node_modules/
+# Node dependencies
+node_modules/
 
-# Python
+# Python cache
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
-# IDE
+# Virtual environments
+venv/
+.env/
+.venv/
+
+# Dataset folder
+datasets/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build folders
+dist/
+build/
+
+# IDE files
 .vscode/
 .idea/
 
-# OS
-.DS_Store
-Thumbs.db
+# Vite cache
+node_modules/.vite/

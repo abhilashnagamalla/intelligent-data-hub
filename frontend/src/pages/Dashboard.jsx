@@ -1,136 +1,189 @@
-import Sidebar from "../components/Sidebar";
-import Header from "../components/Header";
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import api from '../api';
+import { motion } from "framer-motion";
+import DomainCard from '../components/DomainCard';
+import CatalogCard from '../components/CatalogCard';
+import Chatbot from './Chatbot';
+import { Clock, Bot } from 'lucide-react';
 
 export default function Dashboard() {
-  return (
-    <div className="flex h-screen bg-gray-100">
+  const { t } = useTranslation();
+  const [domains, setDomains] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [isIntro, setIsIntro] = useState(true);
 
-      <Sidebar />
+  useEffect(() => {
+    // Intro tooltip animation
+    const timer = setTimeout(() => {
+      setShowTooltip(true);
+      setTimeout(() => {
+        setShowTooltip(false);
+        setIsIntro(false);
+      }, 4000);
+    }, 1000);
 
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
+    return () => clearTimeout(timer);
+  }, []);
 
-        <main className="flex-1 overflow-auto p-8 space-y-10">
+  useEffect(() => {
+    api.get('/domains').then(res => {
+      setDomains(res.data);
+      setLoading(false);
+    }).catch(err => {
+      console.error('Dashboard load error:', err);
+      setLoading(false);
+    });
+  }, []);
 
-          {/* Title Section */}
-          <div>
-            <h2 className="text-3xl font-bold text-gray-800">
-              Intelligent Data Hub
-            </h2>
-            <p className="text-gray-600 mt-2 max-w-3xl">
-              A centralized public analytics platform powered by official
-              datasets from data.gov.in. Explore domain-based insights,
-              structured visualizations, and AI-assisted analysis.
-            </p>
-          </div>
+  const handleMouseEnter = () => {
+    setShowTooltip(true);
+  };
 
-          {/* KPI Section */}
-          <div className="grid md:grid-cols-4 gap-6">
+  const handleMouseLeave = () => {
+    if (!isIntro) setShowTooltip(false);
+  };
 
-            <div className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
-              <div className="text-blue-600 text-3xl">📊</div>
-              <p className="text-sm text-gray-500 mt-2">Supported Domains</p>
-              <h3 className="text-2xl font-bold mt-1">6</h3>
-            </div>
-
-            <div className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
-              <div className="text-green-600 text-3xl">☁</div>
-              <p className="text-sm text-gray-500 mt-2">Cloud Database</p>
-              <h3 className="text-xl font-semibold mt-1">
-                Neon PostgreSQL
-              </h3>
-            </div>
-
-            <div className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
-              <div className="text-purple-600 text-3xl">🔄</div>
-              <p className="text-sm text-gray-500 mt-2">Update Frequency</p>
-              <h3 className="text-xl font-semibold mt-1">
-                Weekly Sync
-              </h3>
-            </div>
-
-            <div className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
-              <div className="text-orange-600 text-3xl">🤖</div>
-              <p className="text-sm text-gray-500 mt-2">AI Assistance</p>
-              <h3 className="text-xl font-semibold mt-1">
-                Domain Restricted
-              </h3>
-            </div>
-
-          </div>
-
-          {/* Feature Section */}
-          <div className="grid lg:grid-cols-3 gap-8">
-
-            <div className="bg-white p-6 rounded-xl shadow hover:shadow-xl transition">
-              <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                📈 Interactive Analytics
-              </h3>
-              <p className="text-gray-600 text-sm">
-                View state-wise reports and domain-based insights with
-                interactive dashboards and structured data visualizations.
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-xl shadow hover:shadow-xl transition">
-              <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                🔐 Secure Authentication
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Access the platform securely using Google OAuth with
-                Gmail-only authentication control.
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-xl shadow hover:shadow-xl transition">
-              <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                🌍 Multilingual Ready
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Designed to support multiple Indian languages for
-                inclusive and accessible data exploration.
-              </p>
-            </div>
-
-          </div>
-
-          {/* Domain Section */}
-          <div className="bg-white p-8 rounded-xl shadow">
-            <h3 className="text-xl font-semibold mb-6">
-              Supported Data Domains
-            </h3>
-
-            <div className="grid md:grid-cols-2 gap-6 text-gray-700">
-
-              <div className="flex items-center gap-3">
-                🏥 <span>Health and Family Welfare</span>
-              </div>
-
-              <div className="flex items-center gap-3">
-                🎓 <span>Education</span>
-              </div>
-
-              <div className="flex items-center gap-3">
-                🚆 <span>Transport</span>
-              </div>
-
-              <div className="flex items-center gap-3">
-                🌾 <span>Agriculture</span>
-              </div>
-
-              <div className="flex items-center gap-3">
-                📊 <span>Census and Surveys</span>
-              </div>
-
-              <div className="flex items-center gap-3">
-                💰 <span>Finance</span>
-              </div>
-
-            </div>
-          </div>
-
-        </main>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[70vh] p-8">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      {/* Hero Stats */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="glass rounded-3xl p-8 lg:p-12 shadow-2xl"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="text-center">
+            <div className="text-4xl font-black text-primary mb-2">{domains.length}</div>
+            <div className="text-gray-600 dark:text-gray-400 font-semibold uppercase tracking-wide text-sm">{t('Domains')}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl font-black text-secondary mb-2">{domains.reduce((sum, d) => sum + (d.datasets || 0), 0)}</div>
+            <div className="text-gray-600 dark:text-gray-400 font-semibold uppercase tracking-wide text-sm">{t('Datasets')}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl font-black text-accent mb-2">{domains.reduce((sum, d) => sum + (d.resources || 0), 0)}</div>
+            <div className="text-gray-600 dark:text-gray-400 font-semibold uppercase tracking-wide text-sm">{t('Resources')}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl font-black text-green-500 mb-2">24%</div>
+            <div className="text-gray-600 dark:text-gray-400 font-semibold uppercase tracking-wide text-sm">{t('Growth MoM')}</div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Domains Grid */}
+      <motion.section 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="space-y-6"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-2 h-12 bg-gradient-to-b from-primary to-secondary rounded-full" />
+          <h2 className="text-4xl font-black bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-200 bg-clip-text text-transparent">
+            {t('Explore Domains')}
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {domains.map((domain) => (
+            <DomainCard 
+              key={domain.sector} 
+              domain={domain}
+            />
+          ))}
+        </div>
+      </motion.section>
+
+      {/* Weekly Updated */}
+      <motion.section 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="space-y-6"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-2 h-12 bg-gradient-to-b from-accent to-purple-500 rounded-full" />
+          <h2 className="text-4xl font-black bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-200 bg-clip-text text-transparent">
+            {t('Weekly Updated Datasets')}
+          </h2>
+          <div className="ml-auto flex items-center gap-2 text-sm bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm px-4 py-2 rounded-2xl font-medium">
+            <Clock className="w-4 h-4" />
+            {t('This Week')}
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {domains.slice(0, 8).map((domain) => (
+            <CatalogCard
+              key={domain.sector}
+              catalog={{
+                title: `${domain.sector.toUpperCase()} Datasets`,
+                datasets_count: domain.datasets,
+                description: `Explore ${domain.datasets} agriculture datasets`,
+                sector: domain.sector
+              }}
+              onView={() => console.log('View', domain)}
+              onDownload={() => console.log('Download', domain)}
+            />
+          ))}
+        </div>
+      </motion.section>
+
+      {/* Floating Chatbot Button with Tooltip */}
+      <div className="fixed bottom-12 right-8 z-[60] flex flex-col items-end gap-2 group">
+        <motion.button
+          className="w-16 h-16 bg-gradient-to-r from-primary to-secondary text-white rounded-full shadow-2xl hover:shadow-glow border-4 border-white/20 flex items-center justify-center relative"
+          initial={{ scale: 0, rotate: -10 }}
+          animate={{ 
+            scale: 1, 
+            y: [0, -4, 0],
+            transition: {
+              y: {
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }
+            }
+          }}
+          whileHover={{ scale: 1.15, rotate: 5 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setChatOpen(true)}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          <Bot className="w-7 h-7 drop-shadow-lg" />
+        </motion.button>
+        
+        <motion.div
+className="bg-slate-800/95 text-white px-4 py-3 rounded-2xl text-sm font-semibold shadow-2xl whitespace-nowrap max-w-xs border border-slate-600/50 origin-right text-slate-100"
+          initial={{ scale: 0, x: 20, opacity: 0 }}
+          animate={showTooltip ? { scale: 1, x: 0, opacity: 1 } : { scale: 0, x: 20, opacity: 0 }}
+          transition={{ type: "spring", stiffness: 400, damping: 20 }}
+        >
+          Ask me anything abt the dataset
+        </motion.div>
+      </div>
+
+      {/* Chatbot Overlay */}
+      {chatOpen && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-8 bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-4xl max-h-[85vh] overflow-hidden rounded-3xl shadow-2xl">
+            <Chatbot 
+              onClose={() => setChatOpen(false)} 
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,94 +1,66 @@
-import httpx
+import os
+import pandas as pd
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+DATASET_FOLDER = "datasets"
 
-from app.models import Dataset, DatasetRecord
-from app.config import settings
-from app.services.domain_resources import DOMAIN_RESOURCES
-
-BASE_URL = "https://api.data.gov.in/resource"
-
-
-async def fetch_full_dataset(resource_id):
-
-    records = []
-    offset = 0
-    limit = 100
-
-    async with httpx.AsyncClient(timeout=120) as client:
-
-        while True:
-
-            url = (
-                f"{BASE_URL}/{resource_id}"
-                f"?api-key={settings.DATA_GOV_API_KEY}"
-                f"&format=json"
-                f"&limit={limit}"
-                f"&offset={offset}"
-            )
-
-            response = await client.get(url)
-
-            if response.status_code != 200:
-                print("API error:", response.text)
-                break
-
-            data = response.json()
-
-            batch = data.get("records", [])
-
-            if not batch:
-                break
-
-            records.extend(batch)
-
-            offset += limit
-
-    return records
+SECTORS = {
+    "health": "health_datasets",
+    "education": "education_datasets",
+    "transport": "transport_datasets",
+    "agriculture": "agriculture_datasets",
+    "census": "census_datasets",
+    "finance": "finance_datasets"
+}
 
 
-async def sync_domain(domain_name, db: AsyncSession):
+def get_sector_path(sector):
 
-    resources = DOMAIN_RESOURCES.get(domain_name, [])
+    folder = SECTORS.get(sector)
 
-    print("datasets for", domain_name, ":", resources)
+    if not folder:
+        return None
 
-    for resource_id in resources:
+    return os.path.join(DATASET_FOLDER, folder)
 
-        rows = await fetch_full_dataset(resource_id)
 
-        print("Rows fetched:", len(rows))
+def list_datasets(sector):
 
-        # check if dataset already exists
-        result = await db.execute(
-            select(Dataset).where(Dataset.id == resource_id)
-        )
+    path = get_sector_path(sector)
 
-        dataset_exists = result.scalar_one_or_none()
+    if not path or not os.path.exists(path):
+        return []
 
-        if not dataset_exists:
+    return [f for f in os.listdir(path) if f.endswith(".csv")]
 
-            dataset = Dataset(
-                id=resource_id,
-                domain=domain_name,
-                title=resource_id,
-                metadata_json={"resource_id": resource_id},
-                source="data.gov.in"
-            )
 
-            db.add(dataset)
+def dataset_count(sector):
 
-        # insert dataset rows
-        for r in rows:
+    return len(list_datasets(sector))
 
-            db.add(
-                DatasetRecord(
-                    dataset_id=resource_id,
-                    data=r
-                )
-            )
 
-    await db.commit()
+def load_dataset(sector, filename):
 
-    print("domain sync completed:", domain_name)
+    path = os.path.join(get_sector_path(sector), filename)
+
+    df = pd.read_csv(path)
+
+    # 🔧 Fix JSON serialization issue
+    df = df.replace([float("inf"), float("-inf")], None)
+    df = df.where(pd.notnull(df), None)
+
+    return df
+
+
+def dataset_preview(df):
+
+    preview = df.head(10)
+
+    return preview.to_dict(orient="records")
+
+
+def dataset_summary(df):
+
+    return {
+        "rows": int(len(df)),
+        "columns": list(df.columns)
+    }
