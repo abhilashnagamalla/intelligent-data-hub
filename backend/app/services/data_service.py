@@ -23,6 +23,8 @@ def get_sector_path(sector):
     return os.path.join(DATASET_FOLDER, folder)
 
 
+import re
+
 def list_datasets(sector):
 
     path = get_sector_path(sector)
@@ -30,7 +32,23 @@ def list_datasets(sector):
     if not path or not os.path.exists(path):
         return []
 
-    return [f for f in os.listdir(path) if f.endswith(".csv")]
+    # Only include datasets that follow the expected naming pattern
+    # such as "001_...csv" to avoid stray files and versioned/duplicate exports.
+    pattern = re.compile(r"^(\d{3})_.*\.csv$")
+
+    files = sorted([f for f in os.listdir(path) if pattern.match(f)])
+
+    # Keep only one file per numeric prefix (e.g., 001_), so we don't return multiple
+    # versions of the same dataset with different hash suffixes.
+    seen = set()
+    filtered = []
+    for f in files:
+        prefix = pattern.match(f).group(1)
+        if prefix not in seen:
+            seen.add(prefix)
+            filtered.append(f)
+
+    return filtered
 
 
 def dataset_count(sector):

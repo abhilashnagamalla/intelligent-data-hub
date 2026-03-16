@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Images Gallery</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+        .gallery { max-width: 1200px; margin: 0 auto; }
+        .image-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+        .image-wrapper { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); flex: 1 1 500px; max-width: 600px; }
+        .image-wrapper img { width: 100%; height: auto; border-radius: 8px; }
+        h1 { text-align: center; color: #333; margin-bottom: 30px; }
+        .timestamp { text-align: center; color: #666; font-size: 0.9em; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="gallery">
+        <h1>Backend Images Gallery</h1>
+        <div class="image-container">
+            <div class="image-wrapper">
+                <img src="Screenshot 2026-03-16 190207.png" alt="Screenshot 1">
+                <div class="timestamp">Screenshot 2026-03-16 19:02:07</div>
+            </div>
+            <div class="image-wrapper">
+                <img src="Screenshot 2026-03-16 190230.png" alt="Screenshot 2">
+                <div class="timestamp">Screenshot 2026-03-16 19:02:30</div>
+            </div>
+        </div>
+        <p style="text-align: center; color: #888; margin-top: 30px;">
+            Both backend images displayed in a single responsive view. Open with: <code>start backend/images/gallery.html</code>
+        </p>
+    </div>
+</body>
+</html>

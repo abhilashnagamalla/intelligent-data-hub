@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Search, Bell } from 'lucide-react';
+import { Search, Bell, LogIn, UserPlus } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 import LanguageSelector from './LanguageSelector';
 import DarkModeToggle from './DarkModeToggle';
 import ProfileDropdown from './ProfileDropdown';
@@ -8,6 +10,8 @@ import ProfileDropdown from './ProfileDropdown';
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const { t } = useTranslation();
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleSearch = (e) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
@@ -21,7 +25,10 @@ export default function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Left: Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <h1 className="text-2xl md:text-3xl font-black bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent drop-shadow-lg">
+            <h1 
+              className="text-2xl md:text-3xl font-black bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent drop-shadow-lg cursor-pointer hover:scale-105 transition-transform"
+              onClick={() => navigate('/')}
+            >
               {t('Intelligent Data Hub')}
             </h1>
           </div>
@@ -57,7 +64,25 @@ export default function Header() {
             </button>
             <DarkModeToggle />
             <LanguageSelector />
-            <ProfileDropdown />
+            {user ? (
+              <ProfileDropdown />
+            ) : (
+              <>
+                <button
+                  onClick={() => navigate('/login')}
+                  className="flex items-center gap-2 px-4 py-2 bg-primary/90 hover:bg-primary text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-glow text-sm whitespace-nowrap"
+                >
+                  <LogIn className="w-4 h-4" />
+                  {t('Sign In')}
+                </button>
+                <button
+                  onClick={() => navigate('/register')}
+                  className="px-4 py-2 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-primary hover:text-white transition-all shadow-lg hover:shadow-glow text-sm whitespace-nowrap"
+                >
+                  {t('Sign Up')}
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

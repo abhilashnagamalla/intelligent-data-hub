@@ -1,5 +1,6 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
+import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Layout from "./components/Layout";
@@ -14,36 +15,32 @@ import DatasetDetail from "./pages/DatasetDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
-
   return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
-    <BrowserRouter>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Navigate to="/login" replace />} />
 
-      <Routes>
-
-        {/* Default page */}
-        <Route path="/" element={<Navigate to="/dashboard" />} />
-
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-
-        {/* Protected dashboard layout */}
-        <Route path="/dashboard" element={
+      {/* Protected routes */}
+      <Route
+        path="/dashboard"
+        element={
           <ProtectedRoute>
             <Layout />
           </ProtectedRoute>
-        }>
-          <Route index element={<Dashboard />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="domain/:sector" element={<DomainPage />} />
-          <Route path="domain/:sector/:filename" element={<DatasetDetail />} />
-          <Route path="chatbot" element={<Chatbot />} />
-        </Route>
+        }
+      >
+        <Route index element={<Dashboard />} />
+        <Route path="profile" element={<Profile />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="domain/:sector" element={<DomainPage />} />
+        <Route path="domain/:sector/:filename" element={<DatasetDetail />} />
+        <Route path="chatbot" element={<Chatbot />} />
+      </Route>
 
-      </Routes>
-
-    </BrowserRouter>
-
+      {/* Catch-all */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
