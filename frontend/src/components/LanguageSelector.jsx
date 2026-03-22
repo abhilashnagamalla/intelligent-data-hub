@@ -3,14 +3,11 @@ import i18n from '../i18n';
 
 const languages = [
   { code: 'en', name: 'English' },
-  { code: 'hi', name: 'हिंदी' },
   { code: 'te', name: 'తెలుగు' },
-  { code: 'ta', name: 'தமிழ்' },
-  { code: 'kn', name: 'ಕನ್ನಡ' },
+  { code: 'hi', name: 'हिंदी' },
   { code: 'ml', name: 'മലയാളം' },
-  { code: 'bn', name: 'বাংলা' },
-  { code: 'mr', name: 'मराठी' },
-  { code: 'gu', name: 'ગુજરાતી' },
+  { code: 'ta', name: 'தமிழ்' },
+  { code: 'kn', name: 'ಕನ್ನಡ' }
 ];
 
 export default function LanguageSelector() {

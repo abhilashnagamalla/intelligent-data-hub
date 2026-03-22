@@ -1,12 +1,14 @@
 import { useState, useContext, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { User, Mail, Lock, Check } from 'lucide-react';
 
 export default function Register() {
   const { user, registerWithEmail, googleLogin, loading, error, clearError } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const fromLanding = searchParams.get('from') === 'landing';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -14,10 +16,10 @@ export default function Register() {
   const [formError, setFormError] = useState('');
 
   useEffect(() => {
-    if (user) {
+    if (user && !fromLanding) {
       navigate('/dashboard');
     }
-  }, [user, navigate]);
+  }, [user, navigate, fromLanding]);
 
   const handleEmailRegister = async (e) => {
     e.preventDefault();
@@ -37,7 +39,7 @@ export default function Register() {
     setFormError('');
     try {
       await registerWithEmail(email, password);
-    } catch (err) {
+    } catch {
       // Error handled in context
     }
   };
@@ -46,7 +48,8 @@ export default function Register() {
     clearError();
     try {
       await googleLogin();
-    } catch (err) {
+      navigate('/dashboard');
+    } catch {
       // Error handled in context
     }
   };

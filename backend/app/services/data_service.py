@@ -32,23 +32,23 @@ def list_datasets(sector):
     if not path or not os.path.exists(path):
         return []
 
-    # Only include datasets that follow the expected naming pattern
-    # such as "001_...csv" to avoid stray files and versioned/duplicate exports.
+    # Only include real numbered dataset files.
+    # This excludes helper files like summary CSVs and collapses duplicate exports
+    # that share the same numeric dataset id.
     pattern = re.compile(r"^(\d{3})_.*\.csv$")
-
     files = sorted([f for f in os.listdir(path) if pattern.match(f)])
 
-    # Keep only one file per numeric prefix (e.g., 001_), so we don't return multiple
-    # versions of the same dataset with different hash suffixes.
-    seen = set()
-    filtered = []
-    for f in files:
-        prefix = pattern.match(f).group(1)
-        if prefix not in seen:
-            seen.add(prefix)
-            filtered.append(f)
+    seen_prefixes = set()
+    unique_files = []
 
-    return filtered
+    for filename in files:
+        prefix = pattern.match(filename).group(1)
+        if prefix in seen_prefixes:
+            continue
+        seen_prefixes.add(prefix)
+        unique_files.append(filename)
+
+    return unique_files
 
 
 def dataset_count(sector):

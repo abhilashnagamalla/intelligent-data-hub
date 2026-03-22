@@ -6,7 +6,7 @@ import {
   signOut, 
   onAuthStateChanged
 } from 'firebase/auth';
-import axios from 'axios';
+import api from '../api';
 
 /* eslint-disable react-refresh/only-export-components */
 export const AuthContext = createContext();
@@ -18,30 +18,11 @@ export default function AuthProvider({ children }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Check URL param ?mock=false to disable mock auth for testing real flow
-    const urlParams = new URLSearchParams(window.location.search);
     const currentPath = window.location.pathname;
-    const isAuthPage = currentPath === '/login' || currentPath === '/register';
-    const useMockAuth = import.meta.env.DEV && !urlParams.get('mock') && !isAuthPage;
+    const isAuthPage = currentPath === '/register';
 
     if (isAuthPage) {
       localStorage.removeItem('user');
-    }
-
-    if (useMockAuth) {
-      setTimeout(() => {
-        const mockUser = {
-          id: 'demo',
-          email: 'demo@example.com',
-          name: 'Demo User',
-          picture: 'https://vitejs.dev/logo.svg',
-          lastLogin: new Date().toISOString()
-        };
-        localStorage.setItem('user', JSON.stringify(mockUser));
-        setUser(mockUser);
-        setLoading(false);
-      }, 500); // Slight delay to show loading
-      return;
     }
 
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -73,6 +54,10 @@ export default function AuthProvider({ children }) {
     try {
       setError(null);
       await signInWithPopup(auth, provider);
+      // Navigate to dashboard after successful login
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 500);
     } catch (error) {
       console.error('Google login error:', error);
       let message = 'Google login failed. Please try again.';
@@ -91,7 +76,7 @@ export default function AuthProvider({ children }) {
     setLoading(true);
     try {
       setError(null);
-      const response = await axios.post('/api/auth/login', { email, password });
+      const response = await api.post('/auth/login', { email, password });
       const token = response.data.access_token;
       // Decode token
       const payload = JSON.parse(atob(token.split('.')[1]));
@@ -115,14 +100,67 @@ export default function AuthProvider({ children }) {
     }
   };
 
-  const registerWithEmail = async (email, password, username) => {
+  const registerWithEmail = async (email, password) => {
     setLoading(true);
     try {
       setError(null);
-      await axios.post('/api/auth/register', { email, username, password });
-      setError(`✓ Registration Successful! Account created for ${email}. Please sign in.`);
+      const response = await api.post('/auth/register', { email, password });
+      const token = response.data.access_token;
+      // Decode token
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userData = {
+        id: payload.user_id,
+        email: payload.email,
+        name: payload.username || email.split('@')[0],
+        token: token
+      };
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
     } catch (error) {
       let message = 'Registration failed. Please try again.';
+      if (error.response && error.response.data && error.response.data.detail) {
+        message = error.response.data.detail;
+      }
+      setError(message);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sendOTP = async (email, username) => {
+    setLoading(true);
+    try {
+      setError(null);
+      const response = await api.post('/auth/send-otp', { email, username });
+      return response.data;  // Return OTP/debug info for testing
+    } catch (error) {
+      let message = 'Failed to send OTP. Please try again.';
+      if (error.response && error.response.data) {
+        // Prefer explicit backend detail/debug messages when available
+        if (error.response.data.detail) {
+          message = error.response.data.detail;
+        } else if (error.response.data.debug_message) {
+          message = error.response.data.debug_message;
+        } else if (typeof error.response.data === 'string') {
+          message = error.response.data;
+        }
+      }
+      setError(message);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyOTP = async (email, otp, password) => {
+    setLoading(true);
+    try {
+      setError(null);
+      await api.post('/auth/verify-otp', { email, otp, password });
+      setError(`✓ Registration Successful! Account created for ${email}. Please sign in.`);
+    } catch (error) {
+      let message = 'Verification failed. Please try again.';
       if (error.response && error.response.data && error.response.data.detail) {
         message = error.response.data.detail;
       }
@@ -142,7 +180,7 @@ export default function AuthProvider({ children }) {
 
     localStorage.removeItem('user');
     setUser(null);
-    navigate('/login');
+    navigate('/');
   };
 
   const clearError = useCallback(() => setError(null), []);
@@ -153,6 +191,8 @@ export default function AuthProvider({ children }) {
       googleLogin, 
       loginWithEmail,
       registerWithEmail,
+      sendOTP,
+      verifyOTP,
       logout, 
       loading, 
       error,

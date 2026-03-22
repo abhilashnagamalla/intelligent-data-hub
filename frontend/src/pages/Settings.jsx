@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
-import { Sun, Moon, Globe, Bell } from 'lucide-react';
+import { Sun, Moon, Globe } from 'lucide-react';
 
 export default function Settings() {
   const { darkMode, toggleDarkMode } = useContext(ThemeContext);
@@ -66,19 +66,6 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Notifications */}
-        <div className="glass p-6 rounded-2xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-semibold">Notifications</h3>
-              <p className="text-gray-500">Receive updates on new datasets</p>
-            </div>
-            <div className="flex items-center gap-2 p-2 bg-gray-200 dark:bg-gray-800 rounded-xl">
-              <Bell className="w-5 h-5" />
-              <span className="text-sm font-medium">Enabled</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

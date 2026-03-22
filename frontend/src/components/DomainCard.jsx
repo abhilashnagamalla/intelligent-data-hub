@@ -1,7 +1,7 @@
 
-import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { HeartPulse, GraduationCap, Truck, Apple, FileBarChart, DollarSign, Database, Library, Package, Calendar, Download, Eye } from 'lucide-react';
+import { HeartPulse, GraduationCap, Truck, Apple, FileBarChart, DollarSign, Database, Library, Download, Eye } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const domainConfig = {
   health: {
@@ -9,7 +9,6 @@ const domainConfig = {
     desc: 'Healthcare datasets and analytics',
     icon: HeartPulse,
     color: 'text-red-600',
-    stats: { catalogs: 24, datasets: 151, resources: 389 },
     topDatasets: ['State Health Indicators', 'Hospital Infrastructure Data', 'Disease Surveillance Dataset'],
     updated: '2 days ago',
     downloads: 530,
@@ -20,7 +19,6 @@ const domainConfig = {
     desc: 'Educational statistics and school data',
     icon: GraduationCap,
     color: 'text-blue-600',
-    stats: { catalogs: 18, datasets: 89, resources: 245 },
     topDatasets: ['School Enrollment Stats', 'Teacher Distribution Data', 'Exam Results Dataset'],
     updated: '5 days ago',
     downloads: 289,
@@ -31,7 +29,6 @@ const domainConfig = {
     desc: 'Transportation and logistics datasets',
     icon: Truck,
     color: 'text-orange-600',
-    stats: { catalogs: 15, datasets: 67, resources: 189 },
     topDatasets: ['Road Accident Data', 'Public Transport Stats', 'Vehicle Registration'],
     updated: '1 week ago',
     downloads: 412,
@@ -42,7 +39,6 @@ const domainConfig = {
     desc: 'Agriculture production and farmer data',
     icon: Apple,
     color: 'text-green-600',
-    stats: { catalogs: 32, datasets: 204, resources: 567 },
     topDatasets: ['Crop Production Stats', 'Farmer Subsidy Data', 'Market Price Trends'],
     updated: '3 days ago',
     downloads: 789,
@@ -53,7 +49,6 @@ const domainConfig = {
     desc: 'Population and demographic data',
     icon: FileBarChart,
     color: 'text-purple-600',
-    stats: { catalogs: 12, datasets: 45, resources: 123 },
     topDatasets: ['Population Census 2011', 'District Demographics', 'Migration Patterns'],
     updated: '1 month ago',
     downloads: 156,
@@ -64,7 +59,6 @@ const domainConfig = {
     desc: 'Financial and economic datasets',
     icon: DollarSign,
     color: 'text-teal-600',
-    stats: { catalogs: 28, datasets: 112, resources: 334 },
     topDatasets: ['GDP State-wise', 'Bank Loan Data', 'Tax Revenue Stats'],
     updated: '4 days ago',
     downloads: 367,
@@ -73,9 +67,9 @@ const domainConfig = {
 };
 
 export default function DomainCard({ domain, onClick }) {
-  const { t } = useTranslation();
   const config = domainConfig[domain.sector.toLowerCase()] || domainConfig.health;
   const Icon = config.icon;
+  const { t } = useTranslation();
 
   return (
     <motion.div
@@ -91,7 +85,7 @@ export default function DomainCard({ domain, onClick }) {
           <Icon className="w-5 h-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="font-bold text-lg leading-tight">{config.name}</h3>
+          <h3 className="font-bold text-lg leading-tight">{t(config.name)}</h3>
           <p className="text-sm text-gray-600 dark:text-gray-400">{config.desc}</p>
         </div>
       </div>
@@ -101,23 +95,16 @@ export default function DomainCard({ domain, onClick }) {
         <div className="flex justify-between">
           <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
             <Database className="w-3.5 h-3.5" />
-            Catalogs
+            {t('Catalogs')}
           </span>
-          <span className="font-semibold">{config.stats.catalogs}</span>
+          <span className="font-semibold">{domain.catalogs || 0}</span>
         </div>
         <div className="flex justify-between">
           <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
             <Library className="w-3.5 h-3.5" />
-            Datasets
+            {t('Datasets')}
           </span>
-          <span className="font-semibold">{config.stats.datasets}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-            <Package className="w-3.5 h-3.5" />
-            Resources
-          </span>
-          <span className="font-semibold">{config.stats.resources}</span>
+          <span className="font-semibold">{domain.datasets || 0}</span>
         </div>
       </div>
 
@@ -125,28 +112,28 @@ export default function DomainCard({ domain, onClick }) {
       <div className="mb-4 space-y-1">
         <div className="font-medium text-xs text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">Top Datasets</div>
         <div className="space-y-1">
-          {config.topDatasets.map((dataset, index) => (
-            <div key={index} className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300">
-              <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-              {dataset}
-            </div>
-          ))}
+          {(domain.topDatasets || config.topDatasets).length > 0 ? (
+            (domain.topDatasets || config.topDatasets).map((dataset, index) => (
+              <div key={index} className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300">
+                <div className="w-1.5 h-1.5 bg-primary rounded-full shrink-0" />
+                <span className="truncate">{dataset}</span>
+              </div>
+            ))
+          ) : (
+            <div className="text-xs text-gray-400 italic">No datasets available</div>
+          )}
         </div>
       </div>
 
       {/* Info & Button */}
-      <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-4 mt-auto">
-        <div className="flex items-center gap-2">
-          <Calendar className="w-3.5 h-3.5" />
-          {config.updated}
+      <div className="flex items-center justify-end gap-4 text-xs text-gray-500 dark:text-gray-400 mb-4 mt-auto">
+        <div className="flex items-center gap-1.5">
+          <Download className="w-4 h-4 text-blue-500" />
+          <span className="font-semibold">{domain.downloads || 0}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <Download className="w-3.5 h-3.5" />
-          {config.downloads}
-        </div>
-        <div className="flex items-center gap-2">
-          <Eye className="w-3.5 h-3.5" />
-          {config.views}
+        <div className="flex items-center gap-1.5">
+          <Eye className="w-4 h-4 text-green-500" />
+          <span className="font-semibold">{domain.views || 0}</span>
         </div>
       </div>
       <motion.button
@@ -155,7 +142,7 @@ export default function DomainCard({ domain, onClick }) {
         className="w-full border border-primary text-primary bg-primary/10 hover:bg-primary/20 font-semibold py-2.5 px-4 rounded-xl text-sm transition-all duration-200"
         onClick={onClick}
       >
-        View Domain →
+        {t('View Details')} →
       </motion.button>
     </motion.div>
   );

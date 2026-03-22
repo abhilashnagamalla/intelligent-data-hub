@@ -1,7 +1,6 @@
-import { motion } from 'framer-motion';
 import { User, Mail, Lock, Check, Eye, EyeOff } from 'lucide-react';
 
-const AuthCard = ({ tab, setTab, onSubmit, formData, setFormData, errors, loading, showPassword, togglePassword, googleLogin, onChangeEmail, onChangeUsername, onChangePassword, onChangeConfirmPassword }) => {
+const AuthCard = ({ tab, setTab, onSubmit, formData, errors, loading, showPassword, togglePassword, googleLogin, onChangeEmail, onChangePassword, onChangeConfirmPassword }) => {
   return (
     <motion.div 
       initial={{ opacity: 0, scale: 0.9 }}
@@ -37,39 +36,22 @@ const AuthCard = ({ tab, setTab, onSubmit, formData, setFormData, errors, loadin
       <form onSubmit={onSubmit} className="space-y-5 relative" autoComplete="off">
         {/* Prevent browser autofill by adding hidden dummy fields */}
         <div className="absolute left-0 top-0 opacity-0 pointer-events-none">
-          <input name="username" autoComplete="username" />
           <input name="password" type="password" autoComplete="current-password" />
         </div>
-        {tab === 'register' && (
-          <div>
-            <label className="block text-gray-900 dark:text-white font-semibold mb-2 flex items-center gap-2">
-              <User className="w-5 h-5" />
-              Username
-            </label>
-            <input
-              type="text"
-              value={formData.username}
-              onChange={onChangeUsername}
-              className="w-full bg-white/70 dark:bg-gray-700/70 hover:bg-white text-gray-900 dark:text-white px-4 py-3 rounded-xl font-semibold border border-white/30 focus:border-primary focus:outline-none transition-all shadow-md placeholder-gray-500 dark:placeholder-gray-400 placeholder:text-sm"
-              placeholder="Choose username"
-              required
-            />
-          </div>
-        )}
 
         <div>
           <label className="block text-gray-900 dark:text-white font-semibold mb-2 flex items-center gap-2">
             <Mail className="w-5 h-5" />
-            {tab === 'login' ? 'Email or Username' : 'Email'}
+            Email
           </label>
           <input
             name="login"
-            type="text"
-            autoComplete={tab === 'login' ? 'username' : 'email'}
+            type="email"
+            autoComplete="email"
             value={formData.email}
             onChange={onChangeEmail}
             className="w-full bg-white/70 dark:bg-gray-700/70 hover:bg-white text-gray-900 dark:text-white px-4 py-3 rounded-xl font-semibold border border-white/30 focus:border-primary focus:outline-none transition-all shadow-md placeholder-gray-500 dark:placeholder-gray-400 placeholder:text-sm"
-            placeholder={tab === 'login' ? 'Enter email or username' : 'Enter your email'}
+            placeholder="Enter your email"
             required
           />
         </div>

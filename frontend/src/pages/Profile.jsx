@@ -7,6 +7,9 @@ export default function Profile() {
 
   if (!user) return null;
 
+  const visitedDatasets = JSON.parse(localStorage.getItem('visited_datasets') || '[]');
+  const visitedDomains = JSON.parse(localStorage.getItem('visited_domains') || '[]');
+
   return (
     <div className="p-8 max-w-2xl mx-auto">
       <div className="text-3xl font-bold mb-8">Profile</div>
@@ -19,11 +22,11 @@ export default function Profile() {
       <div className="grid md:grid-cols-2 gap-4 mt-8">
         <div className="glass p-6 rounded-xl">
           <h3 className="font-semibold mb-2">Datasets Explored</h3>
-          <div className="text-3xl font-bold">42</div>
+          <div className="text-3xl font-bold">{visitedDatasets.length}</div>
         </div>
         <div className="glass p-6 rounded-xl">
           <h3 className="font-semibold mb-2">Domains Visited</h3>
-          <div className="text-3xl font-bold">6</div>
+          <div className="text-3xl font-bold">{visitedDomains.length}</div>
         </div>
       </div>
     </div>

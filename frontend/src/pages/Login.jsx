@@ -1,152 +1,93 @@
-import { useState, useContext, useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import AuthCard from '../components/AuthCard';
-import { User, Mail, Lock, Eye, EyeOff, Check } from 'lucide-react';
+import { User } from 'lucide-react';
 
 export default function Login() {
-  const { user, googleLogin, loginWithEmail, registerWithEmail, loading, error, clearError } = useContext(AuthContext);
+  const { user, googleLogin, loading, error, clearError } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [tab, setTab] = useState('login');
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState({ form: '' });
-  useEffect(() => {
-    if (error) {
-      setErrors({ form: error });
-    }
-  }, [error]);
+  const [searchParams] = useSearchParams();
+  const fromLanding = searchParams.get('from') === 'landing';
 
   useEffect(() => {
-    if (user) {
+    if (user && !fromLanding) {
       navigate('/dashboard');
     }
-  }, [user, navigate]);
-
-  useEffect(() => {
-    clearError();
-    setErrors({ form: '' });
-    // Ensure password is hidden when switching tabs
-    setShowPassword(false);
-    // Clear form data when switching tabs
-    setFormData({
-      username: '',
-      email: '',
-      password: '',
-      confirmPassword: ''
-    });
-  }, [tab, clearError]);
-
-  const validateForm = () => {
-    const newErrors = { form: '' };
-    if (!formData.email || !formData.password) {
-      newErrors.form = 'Please fill all required fields';
-      setErrors(newErrors);
-      return false;
-    }
-    if (tab === 'register') {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) {
-        newErrors.form = 'Please enter a valid email address';
-        setErrors(newErrors);
-        return false;
-      }
-
-      if (!formData.username.trim()) {
-        newErrors.form = 'Username is required';
-        setErrors(newErrors);
-        return false;
-      }
-      if (formData.password !== formData.confirmPassword) {
-        newErrors.form = 'Passwords do not match';
-        setErrors(newErrors);
-        return false;
-      }
-      if (formData.password.length < 6) {
-        newErrors.form = 'Password must be at least 6 characters';
-        setErrors(newErrors);
-        return false;
-      }
-    }
-    return true;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    try {
-      if (tab === 'login') {
-        await loginWithEmail(formData.email, formData.password);
-      } else {
-        await registerWithEmail(formData.email, formData.password, formData.username);
-        // After successful registration, clear form and switch to login
-        setFormData({
-          username: '',
-          email: '',
-          password: '',
-          confirmPassword: ''
-        });
-        setShowPassword(false);
-        setTimeout(() => setTab('login'), 1500);
-      }
-    } catch (err) {
-      // Error handled in context
-    }
-  };
-
-  const handleInputChange = (field) => (e) => {
-    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
-    if (errors.form) setErrors({ form: '' });
-    if (error) clearError();
-  };
-
-  const togglePassword = () => setShowPassword(!showPassword);
+  }, [user, navigate, fromLanding]);
 
   const handleGoogleLogin = async () => {
+    clearError();
     try {
       await googleLogin();
-    } catch (err) {
-      // Handled in context
+      navigate('/dashboard');
+    } catch {
+      // Error handled in context
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-slate-900 flex items-center justify-center">
-        <motion.div 
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-          className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full"
-        />
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-primary via-secondary to-accent">
+        <div className="text-white text-xl">Signing in...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-slate-900 flex items-center justify-center p-4">
-      <AuthCard 
-        tab={tab}
-        setTab={setTab}
-        onSubmit={handleSubmit}
-        formData={formData}
-        setFormData={setFormData}
-        errors={errors}
-        loading={loading}
-        showPassword={showPassword}
-        togglePassword={togglePassword}
-        googleLogin={handleGoogleLogin}
-        onChangeEmail={handleInputChange('email')}
-        onChangeUsername={handleInputChange('username')}
-        onChangePassword={handleInputChange('password')}
-        onChangeConfirmPassword={handleInputChange('confirmPassword')}
-      />
+    <div className="min-h-screen bg-[url('/images/Screenshot 2026-03-16 190230.png')] bg-no-repeat bg-cover bg-center flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-black/20 via-black/40 to-black/60 pointer-events-none" />
+      <div className="relative z-10 w-full h-full">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="glass backdrop-blur-xl bg-white/20 rounded-3xl p-12 max-w-md w-full shadow-2xl border border-white/20 max-h-[85vh] overflow-y-auto mx-auto mt-[5vh]"
+      >
+        <div className="text-center mb-12">
+          <motion.div 
+            animate={{ rotate: [0, 10, -10, 0] }}
+            transition={{ duration: 3, repeat: Infinity }}
+            className="w-28 h-28 bg-gradient-to-r from-white via-primary to-accent rounded-3xl mx-auto mb-8 flex items-center justify-center shadow-glow"
+          >
+            <User className="w-16 h-16 text-white drop-shadow-lg" />
+          </motion.div>
+          <h1 className="text-5xl md:text-6xl font-black bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent mb-6 leading-tight">
+            Welcome
+          </h1>
+          <motion.p 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-2xl text-white/95 font-medium"
+          >
+            Sign in to access your data hub
+          </motion.p>
+        </div>
+
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-red-500/90 text-white p-4 rounded-2xl mb-6 text-center font-medium border border-red-400/50 backdrop-blur-sm"
+          >
+            {error}
+          </motion.div>
+        )}
+
+        <motion.button
+          whileHover={{ scale: 1.05, boxShadow: '0 10px 30px rgba(255,255,255,0.3)' }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleGoogleLogin}
+          disabled={loading}
+          className="w-full bg-white/90 hover:bg-white text-gray-900 font-bold py-5 px-8 rounded-2xl flex items-center justify-center gap-4 shadow-2xl hover:shadow-glow transition-all duration-300 border border-white/30 text-lg backdrop-blur-sm mt-6"
+        >
+          <User className="w-7 h-7" />
+          Continue with Google
+        </motion.button>
+
+      </motion.div>
+      </div>
     </div>
   );
 }

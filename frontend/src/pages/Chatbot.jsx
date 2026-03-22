@@ -1,16 +1,29 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import api from '../api';
+import { useTranslation } from 'react-i18next';
 import { Send, Bot, User, Loader2, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Chatbot({ onClose, sector: propSector }) {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(() => {
+    const slug = propSector || window.location.pathname.split('/domain/')[1] || 'all';
+    const saved = localStorage.getItem(`chatbot_history_${slug}`);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  });
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const { sector } = useParams();
   const location = useLocation();
+  const { t, i18n } = useTranslation();
 
   // Domain slug to title map
   const domainMap = {
@@ -25,7 +38,7 @@ export default function Chatbot({ onClose, sector: propSector }) {
 
   // Parse pathname for domain (e.g. /dashboard/domain/health → 'health')
   const getDomainFromPath = (pathname) => {
-    const match = pathname.match(/\/domain\/([^\/]+)/);
+    const match = pathname.match(/\/domain\/([^/]+)/);
     return match ? match[1] : 'all';
   };
 
@@ -37,8 +50,9 @@ export default function Chatbot({ onClose, sector: propSector }) {
   };
 
   useEffect(() => {
+    localStorage.setItem(`chatbot_history_${slug}`, JSON.stringify(messages));
     scrollToBottom();
-  }, [messages]);
+  }, [messages, slug]);
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -50,7 +64,7 @@ export default function Chatbot({ onClose, sector: propSector }) {
     setIsLoading(true);
 
     try {
-      const response = await api.post('/chatbot/query', { query });
+      const response = await api.post('/chatbot/query', { query, language: i18n.language });
       console.log('Bot response:', response.data);
       const botMessage = {
         type: 'bot',
@@ -88,11 +102,11 @@ export default function Chatbot({ onClose, sector: propSector }) {
           <Bot className="w-10 h-10 text-primary p-2 rounded-2xl bg-white/10" />
           <div>
             <h1 className="text-2xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Domain AI Assistant
+              {t('Domain AI Assistant')}
             </h1>
             <div className="flex items-center gap-2 text-sm text-white/80 bg-black/20 px-3 py-1 rounded-full">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              <span>Current Domain: <strong>{displayDomain}</strong></span>
+              <span>{t('Current Domain')}: <strong>{displayDomain}</strong></span>
             </div>
           </div>
         </div>
@@ -110,12 +124,12 @@ export default function Chatbot({ onClose, sector: propSector }) {
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 space-y-4 py-20">
             <Bot className="w-20 h-20 opacity-50" />
-            <h3 className="text-xl font-semibold">Domain Restricted AI Chatbot</h3>
-            <p className="max-w-md">Ask questions about {displayDomain} datasets. I'll provide insights, charts, and analysis from official government data.</p>
+            <h3 className="text-xl font-semibold">{t('Domain Restricted AI Chatbot')}</h3>
+            <p className="max-w-md">{t('Ask questions about datasets.')} {t("I'll provide insights, charts, and analysis from official government data.")}</p>
             <div className="text-sm opacity-75 space-y-1">
-              <p>• State-wise production trends</p>
-              <p>• Year-over-year comparisons</p>
-              <p>• Dataset summaries & downloads</p>
+              <p>• {t('State-wise production trends')}</p>
+              <p>• {t('Year-over-year comparisons')}</p>
+              <p>• {t('Dataset summaries & downloads')}</p>
             </div>
           </div>
         ) : (
@@ -131,7 +145,7 @@ export default function Chatbot({ onClose, sector: propSector }) {
                   <p>{message.content}</p>
                   {message.chart && (
                     <div className="mt-4 p-4 bg-black/20 rounded-2xl">
-                      <p className="text-xs opacity-75 mb-2">📊 Visualization</p>
+                      <p className="text-xs opacity-75 mb-2">📊 {t('Visualization')}</p>
                       <div className="h-48 bg-gradient-to-br from-white/10 to-transparent rounded-xl animate-pulse" />
                     </div>
                   )}
@@ -154,7 +168,7 @@ export default function Chatbot({ onClose, sector: propSector }) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyPress}
-            placeholder={`Ask about ${displayDomain} data... (e.g. "Telangana agriculture 2023", "production trends")`}
+            placeholder={t('Ask about data...')}
             className="flex-1 max-h-32 min-h-[44px] p-4 rounded-3xl bg-white/20 dark:bg-gray-900/50 backdrop-blur-sm border border-white/30 focus:border-primary focus:ring-4 focus:ring-primary/20 resize-none text-white placeholder-white/70 transition-all"
             rows="1"
             disabled={isLoading}
@@ -174,7 +188,7 @@ export default function Chatbot({ onClose, sector: propSector }) {
           </motion.button>
         </div>
         <div className="text-xs text-white/60 mt-3 text-center">
-          Powered by domain data analysis • Secure & accurate insights
+          {t('Powered by domain data analysis • Secure & accurate insights')}
         </div>
       </div>
     </motion.div>
